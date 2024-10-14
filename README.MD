@@ -22,3 +22,19 @@ To get started with this example, make sure you have [Qt](https://www.qt.io/prod
 3. After compilation, you should be able to run the application to see the QtWidgets features in action.
 
 For more details on compiling with CMake, you can refer to the [CMake Documentation](https://cmake.org/documentation/).
+
+## 🌐 Multilingual Support
+
+Qt library supports multilanguage environment by applying set of configurations and using two externals toosl: lupdate, lrelease. 
+
+The steps necessary to develop multilanguage application are:
+
+1. Modify the `CMakeLists.txt`
+   * [Specify target languages](./CMakeLists.txt#L15-L16)
+   * [Enable translation steps in compilation process](./CMakeLists.txt#L37-L37)
+   * [Remove original template translate files (if presented)](./CMakeLists.txt#L24-L24)
+   * [Disable original template configurations (if presented)](./CMakeLists.txt#L51-L52)
+2. Generate translation files by calling lupdate (or enable corresponding build steps in configuration of your IDE)
+3. Translate the string by using QLinquist app or by any text editor
+4. Compile your application
+5. Implement business logic to switch languages
