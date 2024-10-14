@@ -17,14 +17,14 @@ MainWindow::MainWindow(QWidget *parent)
     if (setting.value("general/language", "EN").toString() == "EN"){
         ui->actionCzech->setChecked(false);
         ui->actionEnglish->setChecked(true);
-        translator.load(":/language/translate_en.qm");
+        translator.load(":/i18n/SimpleTaxCalc_en.qm");
         qApp->installTranslator(&translator);
         ui->retranslateUi(this);
 
     }else{
         ui->actionCzech->setChecked(true);
         ui->actionEnglish->setChecked(false);
-        translator.load(":/language/translate_cz.qm");
+        translator.load(":/i18n/SimpleTaxCalc_cs.qm");
         qApp->installTranslator(&translator);
         ui->retranslateUi(this);
     }
@@ -78,7 +78,7 @@ void MainWindow::on_actionEnglish_triggered()
     ui->actionCzech->setChecked(false);
     settings.setValue("general/language", "EN");
     qApp->removeTranslator(&translator);
-    translator.load(":/language/translate_en.qm");
+    translator.load(":/i18n/SimpleTaxCalc_en.qm");
     qApp->installTranslator(&translator);
     ui->retranslateUi(this);
 }
@@ -89,7 +89,7 @@ void MainWindow::on_actionCzech_triggered()
     ui->actionEnglish->setChecked(false);
     settings.setValue("general/language", "CZ");
     qApp->removeTranslator(&translator);
-    translator.load(":/language/translate_cz.qm");
+    translator.load(":/i18n/SimpleTaxCalc_cs.qm");
     qApp->installTranslator(&translator);
     ui->retranslateUi(this);
 }
