@@ -1,0 +1,95 @@
+name: CMake and Qt6 CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up dependencies based on the operating system
+      - name: Install dependencies on Ubuntu
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt6-base-dev qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools cmake build-essential
+
+      - name: Install dependencies on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install qt cmake
+
+      - name: Install dependencies on Windows
+        if: runner.os == 'Windows'
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+          choco install qt6-default -y
+
+      # Set up Qt environment for Windows
+      - name: Set up Qt environment on Windows
+        if: runner.os == 'Windows'
+        run: |
+          echo "CMAKE_PREFIX_PATH=C:\\Qt\\6.5.0\\msvc2019_64" >> $GITHUB_ENV
+
+      # Create a build directory
+      - name: Create Build Directory
+        run: mkdir build
+
+      # Configure with CMake based on platform
+      - name: Configure with CMake on Linux and macOS
+        if: runner.os != 'Windows'
+        run: |
+          cmake -S . -B build -G "Unix Makefiles" -DCMAKE_PREFIX_PATH=$(brew --prefix qt)
+
+      - name: Configure with CMake on Windows
+        if: runner.os == 'Windows'
+        run: |
+          cmake -S . -B build -G "NMake Makefiles" -DCMAKE_PREFIX_PATH=$env:CMAKE_PREFIX_PATH
+
+      # Build the project
+      - name: Build the project
+        run: cmake --build build
+
+      # Package on Linux (optional step, you may adjust based on your needs)
+      - name: Package application on Linux
+        if: runner.os == 'Linux'
+        run: |
+          linuxdeploy --appdir=AppDir --executable=build/myapp --output=appimage
+
+      # Package on macOS with macdeployqt
+      - name: Package application on macOS
+        if: runner.os == 'macOS'
+        run: |
+          /usr/local/opt/qt/bin/macdeployqt build/myapp.app
+
+      # Package on Windows with windeployqt
+      - name: Package application on Windows
+        if: runner.os == 'Windows'
+        run: |
+          C:\Qt\6.5.0\msvc2019_64\bin\windeployqt.exe build\myapp.exe
+
+      # Upload artifact (all platforms)
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: myapp-${{ matrix.os }}
+          path: |
+            build/myapp*   # Binary files (exe, appimage, etc.)
+            build/*.dll    # Windows DLLs
+            build/*.so     # Linux shared libraries
+            build/*.dylib  # macOS dynamic libraries
