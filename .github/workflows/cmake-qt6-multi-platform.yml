@@ -1,4 +1,4 @@
-name: CMake and Qt6 CI
+name: CMake and Qt6.8+ LTS CI
 
 on:
   push:
@@ -21,30 +21,37 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up dependencies based on the operating system
+      # Set up Qt and other dependencies based on the operating system
+      # Linux (Ubuntu) - Install Qt 6.8 LTS
       - name: Install dependencies on Ubuntu
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt6-base-dev qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools cmake build-essential
+          sudo apt-get install -y wget build-essential cmake
+          # Download and install Qt 6.8 using Qt installer
+          wget https://download.qt.io/official_releases/online_installers/qt-unified-linux-x64-online.run -O qt-installer.run
+          chmod +x qt-installer.run
+          ./qt-installer.run --accept-licenses --no-force-installations -q --platform minimal --outputdir /opt/qt --target-version 6.8
+          echo "CMAKE_PREFIX_PATH=/opt/qt/6.8/gcc_64" >> $GITHUB_ENV
 
+      # macOS - Install Qt 6.8 LTS using Homebrew
       - name: Install dependencies on macOS
         if: runner.os == 'macOS'
         run: |
           brew update
-          brew install qt cmake
+          brew install cmake
+          # Install Qt 6.8 LTS
+          brew install qt@6.8
+          echo "CMAKE_PREFIX_PATH=$(brew --prefix qt@6.8)" >> $GITHUB_ENV
 
+      # Windows - Install Qt 6.8 LTS using Chocolatey or Qt installer
       - name: Install dependencies on Windows
         if: runner.os == 'Windows'
         run: |
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
-          choco install qt6-default -y
-
-      # Set up Qt environment for Windows
-      - name: Set up Qt environment on Windows
-        if: runner.os == 'Windows'
-        run: |
-          echo "CMAKE_PREFIX_PATH=C:\\Qt\\6.5.0\\msvc2019_64" >> $GITHUB_ENV
+          # Download and install Qt 6.8 using Qt online installer
+          choco install qt --version 6.8 -y
+          echo "CMAKE_PREFIX_PATH=C:\\Qt\\6.8.0\\msvc2019_64" >> $GITHUB_ENV
 
       # Create a build directory
       - name: Create Build Directory
@@ -54,7 +61,7 @@ jobs:
       - name: Configure with CMake on Linux and macOS
         if: runner.os != 'Windows'
         run: |
-          cmake -S . -B build -G "Unix Makefiles" -DCMAKE_PREFIX_PATH=$(brew --prefix qt)
+          cmake -S . -B build -G "Unix Makefiles" -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH
 
       - name: Configure with CMake on Windows
         if: runner.os == 'Windows'
@@ -65,7 +72,12 @@ jobs:
       - name: Build the project
         run: cmake --build build
 
-      # Package on Linux (optional step, you may adjust based on your needs)
+      # Optionally run tests (if any)
+      - name: Run tests
+        run: |
+          cd build && ctest
+
+      # Package on Linux (optional step)
       - name: Package application on Linux
         if: runner.os == 'Linux'
         run: |
@@ -75,13 +87,13 @@ jobs:
       - name: Package application on macOS
         if: runner.os == 'macOS'
         run: |
-          /usr/local/opt/qt/bin/macdeployqt build/myapp.app
+          /usr/local/opt/qt@6.8/bin/macdeployqt build/myapp.app
 
       # Package on Windows with windeployqt
       - name: Package application on Windows
         if: runner.os == 'Windows'
         run: |
-          C:\Qt\6.5.0\msvc2019_64\bin\windeployqt.exe build\myapp.exe
+          C:\Qt\6.8.0\msvc2019_64\bin\windeployqt.exe build\myapp.exe
 
       # Upload artifact (all platforms)
       - name: Upload artifact
