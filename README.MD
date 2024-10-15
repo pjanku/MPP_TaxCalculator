@@ -25,7 +25,7 @@ For more details on compiling with CMake, you can refer to the [CMake Documentat
 
 ## 🌐 Multilingual Support
 
-** The following steps, including project confirmations, can be applied to Qt 6.7 and newer. Older versions can require CMake file modifications!**
+**The following steps, including project confirmations, can be applied to Qt 6.7 and newer. Older versions can require CMake file modifications!**
 
 Qt library supports a multilanguage environment by applying a set of configurations and using two external tools: lupdate and lrelease. 
 
