@@ -33,8 +33,18 @@ The steps necessary to develop multilanguage application are:
    * [Specify target languages](./CMakeLists.txt#L15-L16)
    * [Enable translation steps in compilation process](./CMakeLists.txt#L37-L37)
    * [Remove original template translate files (if presented)](./CMakeLists.txt#L24-L24)
-   * [Disable original template configurations (if presented)](./CMakeLists.txt#L51-L52)
+   * [Disable original template configurations (if presented)](./CMakeLists.txt#L51-L52), [etc. ](./CMakeLists.txt#L38-L38)
 2. Generate translation files by calling lupdate (or enable corresponding build steps in configuration of your IDE)
 3. Translate the string by using QLinquist app or by any text editor
 4. Compile your application
 5. Implement business logic to switch languages
+
+```c++
+   //mainwindow.h 
+   QTranslator translator;
+   
+   //mainwindow.cpp
+   if (translator.load(":/i18n/SimpleTaxCalc_en.qm"))
+      QCoreApplication::installTranslator(&translator);
+   ui->retranslateUi(this);
+```
